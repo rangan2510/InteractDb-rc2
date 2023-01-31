@@ -1,0 +1,27 @@
+diseaseClassNID	vocabulary	diseaseClass	diseaseClassName
+2	MSH	C23	   Pathological Conditions, Signs and Symptoms
+3	MSH	C16	   Congenital, Hereditary, and Neonatal Diseases and Abnormalities
+6	MSH	C06	   Digestive System Diseases
+7	MSH	C04	   Neoplasms
+10	MSH	C18	   Nutritional and Metabolic Diseases
+17	MSH	C13	   Female Urogenital Diseases and Pregnancy Complications
+20	MSH	C01	   Infections
+21	MSH	C11	   Eye Diseases
+22	MSH	C17	   Skin and Connective Tissue Diseases
+25	MSH	C05	   Musculoskeletal Diseases
+27	MSH	C12	   Male Urogenital Diseases
+28	MSH	C08	   Respiratory Tract Diseases
+30	MSH	C20	   Immune System Diseases
+33	MSH	C10	   Nervous System Diseases
+35	MSH	C19	   Endocrine System Diseases
+36	MSH	C25	   Chemically-Induced Disorders
+37	MSH	F03	   Mental Disorders
+39	MSH	C07	   Stomatognathic Diseases
+40	MSH	C09	   Otorhinolaryngologic Diseases
+41	MSH	C15	   Hemic and Lymphatic Diseases
+47	MSH	F01	   Behavior and Behavior Mechanisms
+48	MSH	C22	   Animal Diseases
+53	MSH	C24	   Occupational Diseases
+64	MSH	C14	   Cardiovascular Diseases
+66	MSH	C26	   Wounds and Injuries
+85	MSH	C21	   Disorders of Environmental Origin
