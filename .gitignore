@@ -167,3 +167,7 @@ cython_debug/
 parser/temp/drug-interactions.tsv
 loader/ingest/drug_drug_edges_ids.csv
 loader/ingest/drug_drug_edges.tsv
+*.sql
+data/genes/9606.protein.info.v11.5.txt
+data/genes/9606.protein.links.full.v11.5.txt
+data/genes/9606.protein.sequences.v11.5.fa
