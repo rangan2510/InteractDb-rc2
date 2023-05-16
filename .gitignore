@@ -3,6 +3,7 @@ data/diseases/DisGeNET/disgenet_2020.sqlite
 data/drugs/drugbank_5.1.10/full database.xml
 data/side_effects/meddra_all_label_se.tsv
 
+.vscode
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
