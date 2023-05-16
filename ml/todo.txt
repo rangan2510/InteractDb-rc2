@@ -1,0 +1,8 @@
+1. Open SDF file containing structures.
+2. Convert structures (SMILES) into PyG graph item
+2.1 Preferably use PyG lib: https://pytorch-geometric.readthedocs.io/en/latest/_modules/torch_geometric/utils/smiles.html?highlight=smiles
+2.2 Create a dataloader
+3. Use PyG autoencoder (simple GAE) to encode representations of multiple graphs
+	eg. 	https://github.com/pyg-team/pytorch_geometric/blob/master/examples/autoencoder.py
+		https://pytorch-geometric.readthedocs.io/en/latest/generated/torch_geometric.nn.models.GAE.html
+4. Store encoded vectors against drug ids. 
