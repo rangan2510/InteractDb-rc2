@@ -168,3 +168,5 @@ data/genes/string-db_11.5/*.txt
 loader/ingest/*.csv
 loader/ingest/*.tsv
 parser/temp/gene_edges.tsv
+data/diseases/DisGeNET/tables/geneDiseaseNetwork.csv
+parser/temp/disease_gene.csv
