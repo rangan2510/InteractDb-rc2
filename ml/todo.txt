@@ -6,3 +6,5 @@
 	eg. 	https://github.com/pyg-team/pytorch_geometric/blob/master/examples/autoencoder.py
 		https://pytorch-geometric.readthedocs.io/en/latest/generated/torch_geometric.nn.models.GAE.html
 4. Store encoded vectors against drug ids. 
+
+https://github.com/shionhonda/gae-dgl

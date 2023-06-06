@@ -165,10 +165,15 @@ cython_debug/
 #  and can be added to the global gitignore or merged into this file.  For a more nuclear
 #  option (not recommended) you can uncomment the following to ignore the entire idea folder.
 #.idea/
+
+# repo-specific files
+data/diseases/DisGeNET/disgenet_2020.sqlite
+data/drugs/drugbank_5.1.10/full database.xml
+data/side_effects/meddra_all_label_se.tsv
 parser/temp/drug-interactions.tsv
-loader/ingest/drug_drug_edges_ids.csv
-loader/ingest/drug_drug_edges.tsv
-*.sql
-data/genes/9606.protein.info.v11.5.txt
-data/genes/9606.protein.links.full.v11.5.txt
-data/genes/9606.protein.sequences.v11.5.fa
+data/genes/string-db_11.5/*.txt
+loader/ingest/*.csv
+loader/ingest/*.tsv
+parser/temp/gene_edges.tsv
+data/diseases/DisGeNET/tables/geneDiseaseNetwork.csv
+parser/temp/disease_gene.csv
