@@ -253,15 +253,7 @@ model = DTI_MOA(7)
 model.load_state_dict(torch.load("model_state_dict.pt", device))
 model.eval()
 
-class_map = {
-    0: "inhibitor",
-    1: "antagonist",
-    2: "agonist",
-    3: "ligand",
-    4: "allosteric modulator",
-    5: "inducer",
-    6: "unknown",
-}
+class_map = {    0: "inhibitor",    1: "antagonist",    2: "agonist",    3: "ligand",    4: "allosteric modulator",    5: "inducer",    6: "unknown",}
 
 
 def get_dti_moa(uniprot_id, db_id):
@@ -290,5 +282,8 @@ def get_dti_moa(uniprot_id, db_id):
     with torch.no_grad():
         out = model(*(custom_format(([prot, chem_drug, prot_drug], None))[0]))
 
-    out = torch.argmax(torch.softmax(out, -1), -1).flatten().detach().cpu().item()
-    return class_map[out]
+    out = torch.softmax(out, -1).flatten().detach().cpu().numpy()
+    out_dict = {}
+    for i, p in enumerate(out):
+        out_dict[class_map[i]] = p
+    return out_dict
