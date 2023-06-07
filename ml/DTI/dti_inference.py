@@ -287,3 +287,12 @@ def get_dti_moa(uniprot_id, db_id):
     for i, p in enumerate(out):
         out_dict[class_map[i]] = p
     return out_dict
+
+db_id = input('Enter Drugbank ID: ')
+uniprot_id = input('Enter potential target UniProtKB ID: ')
+input('Press Enter to continue...')
+
+res = get_dti_moa(uniprot_id, db_id)
+print("\n")
+for k,v in res.items():
+    print(k + ": \t" + str(round(v*100, 2)) + "%")
