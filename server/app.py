@@ -275,7 +275,7 @@ def visualize_ddi():
 
 @app.route("/")
 def index():
-    return jsonify("InteractDb_rc2 build_230305.01")
+    return jsonify("InteractDb_rc2 build_2308.03")
 
 
 if __name__ == '__main__':
