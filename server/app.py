@@ -8,6 +8,8 @@ from itertools import product, combinations
 urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 from pyvis.network import Network
 import sqlalchemy as sa
+import graphistry
+import graph_visualization as gv
 
 params = urllib.parse.quote_plus('Driver={ODBC Driver 17 for SQL Server};'
                       'Server=localhost;'
@@ -108,6 +110,17 @@ def easy_interactions_search():
         return res.to_json(), 200
     else:
         return jsonify("No interactions found."), 200
+
+@app.route("/graphvis")
+def db_ens_uni_graph():
+  x = request.args.get('x')
+  y = request.args.get('y')
+  dbids = [x,y]
+  dnames, gene_df, gene_search_space_, gene_df_list, dfs = gv.run_queries(dbids, cnxn)
+  nodes_df = gv.create_nodes_list(dnames, gene_df, gene_search_space_)
+  edges_df = gv.create_edge_list(dnames, gene_df, gene_df_list, dfs)
+  url, graph_obj = gv.graph_vis(edges_df, nodes_df)
+  return url
 
 @app.route("/vis")
 def visualize_ddi():
