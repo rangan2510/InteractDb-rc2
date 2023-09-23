@@ -116,9 +116,9 @@ def db_ens_uni_graph():
   x = request.args.get('x')
   y = request.args.get('y')
   dbids = [x,y]
-  gene_df, gene_search_space_, gene_df_list, dfs = gv.run_queries(dbids, cnxn)
-  nodes_df = gv.create_nodes_list(dbids, gene_df, gene_search_space_)
-  edges_df = gv.create_edge_list(dbids, gene_df, gene_df_list, dfs)
+  dname_df, gene_df, gene_search_space_, gene_df_list, dfs = gv.run_queries(dbids, cnxn)
+  nodes_df = gv.create_nodes_list(dname_df, gene_df, gene_search_space_)
+  edges_df = gv.create_edge_list(dname_df, gene_df, gene_df_list, dfs)
   url, graph_obj = gv.graph_vis(edges_df, nodes_df)
   return url
 
