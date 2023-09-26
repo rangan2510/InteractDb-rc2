@@ -25,23 +25,26 @@ def run_queries(dnames, con):
   gene_df = gene_df.drop_duplicates().reset_index(drop=True)
 
   gene_search_space_ = list(set(gene_df["ensembl_id"].unique()))
-  gene_search_space = list(combinations(gene_search_space_, 2))
+  
+  placeholders = ', '.join([':gene_id{}'.format(i) for i, _ in enumerate(gene_search_space_, 1)])
 
-  dfs = []
+  qry = f"""\
+  SELECT DISTINCT
+    CASE WHEN g1.ensembl_id < g2.ensembl_id THEN g1.ensembl_id ELSE g2.ensembl_id END AS 'Gene 1',
+    CASE WHEN g1.ensembl_id < g2.ensembl_id THEN g2.ensembl_id ELSE g1.ensembl_id END AS 'Gene 2'
+  FROM (
+    SELECT Gene1.ensembl_id AS ensembl_id1, Gene2.ensembl_id AS ensembl_id2
+    FROM gene_nodes Gene1, gene_gene_edges, gene_nodes Gene2
+    WHERE MATCH(Gene1-(gene_gene_edges)->Gene2)
+    AND Gene1.ensembl_id IN ({placeholders})
+    AND Gene2.ensembl_id IN ({placeholders})
+  ) AS subquery
+  JOIN gene_nodes g1 ON subquery.ensembl_id1 = g1.ensembl_id
+  JOIN gene_nodes g2 ON subquery.ensembl_id2 = g2.ensembl_id
+  """
 
-  for g in gene_search_space:
-          x_, y_ = g
-          qry = '''\
-          SELECT Gene1.ensembl_id AS 'Gene 1', Gene2.ensembl_id AS 'Gene 2'
-          FROM gene_nodes Gene1, gene_gene_edges, gene_nodes Gene2
-          WHERE MATCH(Gene1-(gene_gene_edges)->Gene2)
-          AND Gene1.ensembl_id = '{x}'
-          AND Gene2.ensembl_id = '{y}'\
-          '''.format(x=x_, y=y_)
-          df = pd.read_sql(sa.text(qry), con)
-          dfs.append(df)
-
-  dfs = pd.concat(dfs)
+  params = {f'gene_id{i}': gene_id for i, gene_id in enumerate(gene_search_space_, 1)}
+  dfs = pd.read_sql(sa.text(qry).bindparams(**params), con)
   dfs = dfs.reset_index(drop=True)
 
   return gene_df, gene_search_space_, gene_df_list, dfs
