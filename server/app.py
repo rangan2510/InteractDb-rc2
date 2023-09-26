@@ -115,8 +115,8 @@ def easy_interactions_search():
 def db_ens_uni_graph():
   x = request.args.get('x')
   y = request.args.get('y')
-  dbids = [x,y]
-  dnames, gene_df, gene_search_space_, gene_df_list, dfs = gv.run_queries(dbids, cnxn)
+  dnames = [x,y]
+  gene_df, gene_search_space_, gene_df_list, dfs = gv.run_queries(dnames, cnxn)
   nodes_df = gv.create_nodes_list(dnames, gene_df, gene_search_space_)
   edges_df = gv.create_edge_list(dnames, gene_df, gene_df_list, dfs)
   url, graph_obj = gv.graph_vis(edges_df, nodes_df)
