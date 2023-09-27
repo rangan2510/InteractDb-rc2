@@ -51,7 +51,7 @@ app.config.from_object("config.Config")
 CORS(app)
 
 
-@app.route("/search")
+@app.route("/api/search")
 def basic_synonym_search():
     q = request.args.get('q')
     mode=request.args.get('mode')
@@ -68,7 +68,7 @@ def basic_synonym_search():
     df = df[collist[1:]] 
     return df.to_json(), 200
 
-@app.route("/interactions")
+@app.route("/api/interactions")
 def easy_interactions_search():
     x = request.args.get('x')
     y = request.args.get('y')
@@ -111,7 +111,7 @@ def easy_interactions_search():
     else:
         return jsonify("No interactions found."), 200
 
-@app.route("/graphvis")
+@app.route("/api/graphvis")
 def db_ens_uni_graph():
   x = request.args.get('x')
   y = request.args.get('y')
@@ -120,170 +120,7 @@ def db_ens_uni_graph():
   nodes_df = gv.create_nodes_list(dnames, gene_df, gene_search_space_)
   edges_df = gv.create_edge_list(dnames, gene_df, gene_df_list, dfs)
   url, graph_obj = gv.graph_vis(edges_df, nodes_df)
-  return url
-
-@app.route("/vis")
-def visualize_ddi():
-    x = request.args.get('x')
-    y = request.args.get('y')
-
-    # %%
-    x_ids, y_ids = get_drugbank_ids(x), get_drugbank_ids(y)
-    search_set = x_ids + y_ids
-    search_set = list(set(search_set))
-    search_space = list(product(x_ids, y_ids))
-
-
-    # %%
-    drug_group_id = 1
-    gene_group_id = 2
-    disease_group_id = 3
-
-    # %% [markdown]
-    # # Direct drug interactions
-
-    # %%
-    dfs = []
-
-    for s in search_space:
-        x_, y_ = s
-        qry = '''\
-        SELECT Drug1.drugbank_id AS src_id, Drug1.name AS 'Source Drug', Drug2.drugbank_id as dst_id, Drug2.name AS 'Interacting Drug', [dbo].[drug_drug_edges].[desc] AS 'Effect of Interaction'
-        FROM drug_nodes Drug1, drug_drug_edges, drug_nodes Drug2
-        WHERE MATCH(Drug1-(drug_drug_edges)->Drug2)
-        AND Drug1.drugbank_id = '{x}'
-        AND Drug2.drugbank_id = '{y}'\
-        '''.format(x=x_, y=y_)
-        df = pd.read_sql_query(qry, cnxn)
-        dfs.append(df)
-
-    dfs = pd.concat(dfs)
-
-
-
-    # %%
-    for idx, row in dfs.iterrows():
-        x, y = row["Source Drug"], row["Interacting Drug"]
-        x_id, y_id = row["src_id"], row["dst_id"]
-        net.add_node(x_id, title=x_id, label=x, group=drug_group_id)
-        net.add_node(y_id, title=y_id, label=y, group=drug_group_id)
-        net.add_edge(x_id,y_id, title=str(row["Effect of Interaction"]))
-
-
-
-    # %%
-    dfs = []
-    for item in search_set:
-        qry = '''\
-        SELECT Drug1.drugbank_id, Drug1.name AS [Drug 1], Genes.gene_names, Genes.ensembl_id, drug_gene_edges.action
-        FROM drug_nodes Drug1, drug_gene_edges, gene_nodes Genes
-        WHERE MATCH(Drug1-(drug_gene_edges)->Genes)
-        AND Drug1.drugbank_id = '{x}'\
-        '''.format(x=item)
-        df = pd.read_sql_query(qry, cnxn)
-        dfs.append(df)
-
-    dfs = pd.concat(dfs)
-
-
-    # %%
-    # dfg = pd.DataFrame(dfs.groupby('ensembl_id')['gene_names'].apply(', '.join))
-    # dfg = pd.DataFrame(dfg.to_records())
-    # dfs = pd.merge(left=dfg, right=dfs[["drugbank_id", "Drug 1", "ensembl_id", "action"]], on="ensembl_id", how="inner")
-    # dfs = dfs.drop_duplicates()
-
-    # %%
-    for idx, row in dfs.iterrows():
-        x, y, z = row["Drug 1"], row["gene_names"], row["action"]
-        x_id, y_id = row["drugbank_id"], row["gene_names"]
-        net.add_node(x_id, title=x_id, label=x, group=drug_group_id)
-        net.add_node(y_id, title=y_id, label=y, group=gene_group_id)
-        net.add_edge(x_id,y_id, title=str(z))
-
-    # %% [markdown]
-    # # Gene Gene interactions
-
-    # %%
-    gene_search_space_ = list(set(dfs["ensembl_id"].to_list()))
-    gene_search_space = list(combinations(gene_search_space_, 2))
-
-
-    # %%
-    dfs = []
-
-    for g in gene_search_space:
-        x_, y_ = g
-        qry = '''\
-        SELECT Gene1.gene_names AS 'Gene 1', Gene2.gene_names AS 'Gene 2'
-        FROM gene_nodes Gene1, gene_gene_edges, gene_nodes Gene2
-        WHERE MATCH(Gene1-(gene_gene_edges)->Gene2)
-        AND Gene1.ensembl_id = '{x}'
-        AND Gene2.ensembl_id = '{y}'\
-        '''.format(x=x_, y=y_)
-        df = pd.read_sql_query(qry, cnxn)
-        dfs.append(df)
-
-    dfs = pd.concat(dfs)
-
-
-    # %%
-    for idx, row in dfs.iterrows():
-        x, y = row["Gene 1"], row["Gene 2"]
-        net.add_edge(x,y)
-
-
-    # %%
-    dfs = []
-
-    for g in gene_search_space_:
-        qry = '''\
-        SELECT Disease.name AS [Disease Name], Disease.vocabulary, Genes.gene_names as [Associated Genes], disease_gene_edges.sentence
-        FROM disease_nodes Disease, disease_gene_edges, gene_nodes Genes
-        WHERE MATCH (Genes-(disease_gene_edges)->Disease)
-        AND Genes.ensembl_id = '{x}'\
-            '''.format(x=g)
-        df = pd.read_sql_query(qry, cnxn)
-        dfs.append(df)
-
-    dfs = pd.concat(dfs)
-
-    # %%
-    dfs = dfs.drop_duplicates()
-
-
-    # %%
-    for idx, row in dfs.iterrows():
-        dname = row["Disease Name"]
-        gene = row["Associated Genes"]
-        net.add_node(dname, title=dname, label=dname, group=disease_group_id)
-        net.add_edge(dname, gene, title=str(row["sentence"]))
-
-    # %% [markdown]
-    # ## with drugs
-
-    # %%
-    dfs = []
-
-    for d in search_set:
-        qry = '''\
-        SELECT Disease.vocab_name AS [Disease Name], Disease.MeSH_heading, Drugs.name as [Associated Drugs]
-        FROM disease_nodes Disease, drug_disease_edges, drug_nodes Drugs
-        WHERE MATCH (Drugs-(drug_disease_edges)->Disease)
-        AND Drugs.drugbank_id = '{x}'\
-            '''.format(x=d)
-        df = pd.read_sql_query(qry, cnxn)
-        dfs.append(df)
-
-    dfs = pd.concat(dfs)
-
-
-    # %%
-    for e in net.edges:
-        e['arrows'] = {'to': {'scaleFactor': 0.5}}
-    #net.show_buttons(filter_=['physics'])
-    net.show("demo.html")
-    return(send_from_directory("../", "demo.html", as_attachment=False))
-
+  return jsonify(url)
 
 
 @app.route("/")
