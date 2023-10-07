@@ -1,4 +1,4 @@
-import time, requests, urllib3, os, traceback
+import time, requests, urllib3, os, traceback, json
 import pandas as pd
 from guid import GUID
 from flask import Flask, request, session, render_template, redirect, url_for, jsonify, send_from_directory
@@ -111,7 +111,7 @@ def easy_interactions_search():
     else:
         return jsonify("No interactions found."), 200
 
-@app.route("/api/graphvis")
+@app.route("/api/drug-pair-vis")
 def db_ens_uni_graph():
   x = request.args.get('x')
   y = request.args.get('y')
@@ -122,10 +122,43 @@ def db_ens_uni_graph():
   url, graph_obj = gv.graph_vis(edges_df, nodes_df)
   return jsonify(url)
 
+@app.route("/api/drug-set-se")
+def side_effects():
+    q = request.args.get('q')
+    x = q.split("|")
+
+    x = [i.strip() for i in x]
+    
+    sql_x = []
+    for items in x:
+        x_ = '%' + items + '%'
+        sql_x.append(x_)
+
+    sql_x = ' OR '.join(sql_x)
+
+    print(sql_x)
+
+    qry = '''
+    SELECT Drug.name AS [Drug Name], Drug.synonyms, Drug.atc AS [atc], SideEffect.name AS [SideEffect]
+    FROM drug_nodes Drug, drug_sideeffect_edges DSE, sideeffect_nodes SideEffect
+    WHERE MATCH(Drug-(DSE)->SideEffect)
+    AND CONTAINS(synonyms, '{0}')
+    '''.format(sql_x)
+    
+    df_x = pd.read_sql_query(qry, cnxn)
+
+    payload = []
+
+    for idx, row in df_x.iterrows():
+        payload.append(row.to_dict())
+    
+    return jsonify(payload)
+
+
 
 @app.route("/")
 def index():
-    return jsonify("InteractDb_rc2 build_2308.03")
+    return jsonify("InteractDb_rc2 build_2310.01")
 
 
 if __name__ == '__main__':
