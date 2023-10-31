@@ -55,6 +55,7 @@ df = df[df["structure"].str.len() != 748]  # SMILE tokenizer sequence larger tha
 
 df = df.drop_duplicates()
 df = df.reset_index()
+df.to_excel('dataset_processsed.xlsx')
 
 
 class MyFeatureExtractionPipeline(FeatureExtractionPipeline):
